@@ -37,10 +37,35 @@ Then run `cargo build`.
 ## Usage
 
 ```rust
-use multihash::Sha2_256;
+use tiny_multihash::{Multihash, MultihashDigest, SHA2_256};
 
 fn main() {
-    let hash = Sha2_256::digest(b"my hash");
+    let hash = Multihash::new(SHA2_256, b"my hash");
+    println!("{:?}", hash);
+}
+```
+
+### Using a custom code table
+
+You can derive your own application specific code table:
+
+```rust
+use tiny_multihash::derive::Multihash;
+use tiny_multihash::{Hasher, MultihashDigest};
+
+const FOO: u64 = 0x01;
+const BAR: u64 = 0x02;
+
+#[derive(Clone, Debug, Eq, Multihash, PartialEq)]
+pub enum Multihash {
+    #[mh(code = FOO, hasher = tiny_multihash::Sha2_256)]
+    Foo(tiny_multihash::Sha2Digest<tiny_multihash::U32>),
+    #[mh(code = BAR, hasher = tiny_multihash::Sha2_512)]
+    Bar(tiny_multihash::Sha2Digest<tiny_multihash::U64>),
+}
+
+fn main() {
+    let hash = Multihash::new(FOO, b"my hash");
     println!("{:?}", hash);
 }
 ```
@@ -52,6 +77,7 @@ fn main() {
 * `SHA2-512`
 * `SHA3`/`Keccak`
 * `Blake2b-256`/`Blake2b-512`/`Blake2s-128`/`Blake2s-256`
+* `Strobe`
 
 ## Maintainers
 
@@ -68,4 +94,4 @@ Small note: If editing the README, please conform to the [standard-readme](https
 
 ## License
 
-[MIT](LICENSE) © 2015-2017 Friedel Ziegelmayer
+[MIT](LICENSE)
